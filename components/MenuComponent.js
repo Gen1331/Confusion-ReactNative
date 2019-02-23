@@ -20,18 +20,19 @@ class Menu extends Component {
 
         
         const renderMenuItem = ({item, index}) => {
+        const { navigate } = this.props.navigation;
             
             return (
                 <ListItem
                 key={index}
                 title={item.name}
                 subtitle={item.description}
-                onPress={() => navigate('DishDetail', { dishId: item.id })}                leftAvatar={{ source: require('./images/uthappizza.png')}}
+                onPress={() => navigate('DishDetail', { dishId: item.id })}                
+                leftAvatar={{ source: require('./images/uthappizza.png')}}
                 />
             );
         };
     
-    const { navigate } = this.props.navigation;
         return (
                 <FlatList 
                     data={this.state.dishes}
