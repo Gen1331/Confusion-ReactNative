@@ -8,57 +8,59 @@ import { baseUrl } from '../shared/baseUrl';
 
 const mapStateToProps = state => {
     return {
-      dishes: state.dishes,
-      comments: state.comments
+        dishes: state.dishes,
+        comments: state.comments
     }
-  }
+}
 
 function RenderDish(props) {
 
     const dish = props.dish;
-    
+
     if (dish != null) {
-        return(
+        return (
             <Card
-            featuredTitle={dish.name}
-            image={{uri: baseUrl + dish.image}}>                <Text style={{margin: 10}}>
+                featuredTitle={dish.name}
+                image={{ uri: baseUrl + dish.image }}>
+                <Text style={{ margin: 10 }}>
                     {dish.description}
                 </Text>
                 <Icon
                     raised
                     reverse
-                    name={ props.favorite ? 'heart' : 'heart-o'}
+                    name={props.favorite ? 'heart' : 'heart-o'}
                     type='font-awesome'
                     color='#f50'
-                    onPress={() => props.favorite ? console.log('Already favorite') : props.onPress()}
-                    />
+                    onPress={() => props.favorite ? 
+            console.log('Already favorite') : props.onPress()}
+                />
             </Card>
         );
     }
     else {
-        return(<View></View>);
+        return (<View></View>);
     }
 }
 
 function RenderComments(props) {
     const comments = props.comments;
-            
-    const renderCommentItem = ({item, index}) => {
+
+    const renderCommentItem = ({ item, index }) => {
         return (
-            <View key={index} style={{margin: 10}}>
-                <Text style={{fontSize: 14}}>{item.comment}</Text>
-                <Text style={{fontSize: 12}}>{item.rating} Stars</Text>
-                <Text style={{fontSize: 12}}>{'-- ' + item.author + ', ' + item.date} </Text>
+            <View key={index} style={{ margin: 10 }}>
+                <Text style={{ fontSize: 14 }}>{item.comment}</Text>
+                <Text style={{ fontSize: 12 }}>{item.rating} Stars</Text>
+                <Text style={{ fontSize: 12 }}>{'-- ' + item.author + ', ' + item.date} </Text>
             </View>
         );
     };
-    
+
     return (
         <Card title='Comments' >
-        <FlatList 
-            data={comments}
-            renderItem={renderCommentItem}
-            keyExtractor={item => item.id.toString()}
+            <FlatList
+                data={comments}
+                renderItem={renderCommentItem}
+                keyExtractor={item => item.id.toString()}
             />
         </Card>
     );
@@ -81,17 +83,17 @@ class DishDetail extends Component {
     };
 
     markFavorite(dishId) {
-        this.setState({favorites: this.state.favorites.concat(dishId)});
+        this.setState({ favorites: this.state.favorites.concat(dishId) });
     }
 
     render() {
-        const dishId = this.props.navigation.getParam('dishId','');
-        return(
+        const dishId = this.props.navigation.getParam('dishId', '');
+        return (
             <ScrollView>
                 <RenderDish dish={this.props.dishes.dishes[+dishId]}
                     favorite={this.state.favorites.some(el => el === dishId)}
-                    onPress={() => this.markFavorite(dishId)} 
-                    />
+                    onPress={() => this.markFavorite(dishId)}
+                />
                 <RenderComments comments={this.props.comments.comments.filter((comment) => comment.dishId === dishId)} />
             </ScrollView>
         );
