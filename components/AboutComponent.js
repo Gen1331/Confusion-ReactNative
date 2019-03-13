@@ -52,7 +52,7 @@ class About extends Component {
     };
 
     render() {
-        const renderLeaderItem = ({ item, index }) => {
+        const renderLeader = ({ item, index }) => {
             return (
                 <ListItem
                     key={index}
