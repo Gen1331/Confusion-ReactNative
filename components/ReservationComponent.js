@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Text, View, StyleSheet, ScrollView, Picker, Switch, Button, Alert } from 'react-native';
+import { Text, View, StyleSheet, Picker, Switch, Button, Alert, } from 'react-native';
 import DatePicker from 'react-native-datepicker'
 import * as Animatable from 'react-native-animatable';
-import { Permissions, Notifications } from 'expo';
+import { Permissions, Notifications, Calendar } from 'expo';
 
 
 
@@ -23,11 +23,21 @@ class Reservation extends Component {
         title: 'Reserve Table',
     };
 
-    // toggleModal() {
-    //     this.setState({ showModal: !this.state.showModal });
+    // componentDidMount() {
+    //     SecureStore.getItemAsync('reservationinfo')
+    //         .then((userdata) => {
+    //             let userinfo = JSON.parse(userdata);
+    //             if (userinfo) {
+    //                 this.setState({ guests: userinfo.guests });
+    //                 this.setState({ smoking: userinfo.smoking });
+    //                 this.setState({ date: userinfo.date });
+    //                 this.setState({ remember: true })
+    //             }
+    //         })
     // }
 
     handleReservation() {
+
         Alert.alert(
 
             'Your Reservation OK?',
@@ -43,16 +53,20 @@ class Reservation extends Component {
                 {
                     text: 'OK', onPress: () => {
                         this.presentLocalNotification(this.state.date)
-                        this.resetForm();
+                        console.log(JSON.stringify(this.state));
+                        // this.resetForm();
+                        this.addReservationToCalendar(this.state.date)
                     }
                 },
             ],
             { cancelable: false }
         );
-
-
-        // console.log(JSON.stringify(this.state));
-        // this.toggleModal();
+        // if (this.state.remember)
+        //     SecureStore.setItemAsync('reservationinfo', JSON.stringify({ guests: this.state.guests, smoking: this.state.smoking, date: this.state.date }))
+        //         .catch((error) => console.log('Could not save user info', error));
+        // else
+        //     SecureStore.deleteItemAsync('reservationinfo')
+        //         .catch((error) => console.log('Could not delete user info', error));
     }
 
     resetForm() {
@@ -63,6 +77,30 @@ class Reservation extends Component {
             // showModal: false
         });
     }
+
+    async addReservationToCalendar(date) {
+        await this.obtainCalendarPermission(date);
+        Calendar.createEventAsync(Calendar.DEFAULT, {
+            title: 'Con Fusion Table Reservation',
+            startDate: 'new Date(Date.parse(date)',
+            endDate: 'new Date(Date.parse(date) + (2*60*60*1000',
+            timeZone: 'Asia/Hong_Kong',
+            location: '121, Clear Water Bay Road, Clear Water Bay, Kowloon, Hong Kong',
+
+        }).then(result => console.log(result), err => console.log(err));
+    }
+
+    async obtainCalendarPermission() {
+        let permission = await Permissions.getAsync(Permissions.CALENDAR);
+        if (permission.status !== 'granted') {
+            permission = await Permissions.askAsync(Permissions.CALENDAR);
+            if (permission.status !== 'granted') {
+                Alert.alert('Permission not granted to show notifications');
+            }
+        }
+        return permission;
+    }
+
 
     async obtainNotificationPermission() {
         let permission = await Permissions.getAsync(Permissions.USER_FACING_NOTIFICATIONS);

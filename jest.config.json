@@ -1,0 +1,19 @@
+{
+    "preset": "jest-expo",
+    "moduleDirectories": [
+      "node_modules"
+    ],
+    "moduleFileExtensions": [
+      "js"
+    ],
+    "roots": [
+      "<rootDir>"
+    ],
+    "testMatch": [
+        "**/?(*.)test.js?(x)"
+    ],
+    "setupFilesAfterEnv": [
+      "./setupTests.js"
+    ],
+    "collectCoverage": true
+}

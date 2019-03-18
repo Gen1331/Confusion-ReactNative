@@ -6,12 +6,17 @@ import Contact from './ContactComponent';
 import About from './AboutComponent';
 import Reservation from './ReservationComponent';
 import Favorites from './FavoriteComponent';
-import { View, Platform, Text, ScrollView, Image, StyleSheet } from 'react-native';
+import { View, Platform, Text, ScrollView, Image, StyleSheet, NetInfo, ToastAndroid } from 'react-native'; 
 import { createStackNavigator, createDrawerNavigator, DrawerItems, SafeAreaView } from 'react-navigation';
 import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { fetchDishes, fetchComments, fetchPromos, fetchLeaders } from '../redux/ActionCreators';
 import Login from './LoginComponent';
+
+let toast;
+if (Platform.OS === 'android') {
+  toast = require('ToastAndroid');
+}
 
 const mapStateToProps = state => {
   return {
@@ -150,22 +155,22 @@ const FavoritesNavigator = createStackNavigator({
     })
   })
 
-  const LoginNavigator = createStackNavigator({
-    Login: { screen: Login }
-  }, {
-  navigationOptions: ({ navigation }) => ({
-    headerStyle: {
+const LoginNavigator = createStackNavigator({
+  Login: { screen: Login }
+}, {
+    navigationOptions: ({ navigation }) => ({
+      headerStyle: {
         backgroundColor: "#512DA8"
-    },
-    headerTitleStyle: {
-        color: "#fff"            
-    },
-    headerTintColor: "#fff",
-    headerLeft: <Icon name="menu" size={24}
-      color='white'    
-      onPress={ () => navigation.toggleDrawer() } />    
-  })
-});
+      },
+      headerTitleStyle: {
+        color: "#fff"
+      },
+      headerTintColor: "#fff",
+      headerLeft: <Icon name="menu" size={24}
+        color='white'
+        onPress={() => navigation.toggleDrawer()} />
+    })
+  });
 
 const CustomDrawerContentComponent = (props) => (
   <ScrollView>
@@ -277,15 +282,16 @@ const MainNavigator = createDrawerNavigator({
     }
   },
 
-  Login: 
-  { screen: LoginNavigator,
+  Login:
+  {
+    screen: LoginNavigator,
     navigationOptions: {
       title: 'Login',
       drawerLabel: 'Login',
       drawerIcon: ({ tintColor, focused }) => (
         <Icon
           name='sign-in'
-          type='font-awesome'            
+          type='font-awesome'
           size={24}
           color={tintColor}
         />
@@ -294,19 +300,61 @@ const MainNavigator = createDrawerNavigator({
   },
 
 }, {
-  initialRouteName: 'Home',
-  drawerBackgroundColor: '#D1C4E9',
-  contentComponent: CustomDrawerContentComponent
-});
+    initialRouteName: 'Home',
+    drawerBackgroundColor: '#D1C4E9',
+    contentComponent: CustomDrawerContentComponent
+  });
 
 class Main extends Component {
+
+
 
   componentDidMount() {
     this.props.fetchDishes();
     this.props.fetchComments();
     this.props.fetchPromos();
     this.props.fetchLeaders();
+    NetInfo.getConnectionInfo() 
+      .then((connectionInfo) => {
+        (Platform.OS === 'ios') ? // iOS
+        Alert.alert("Initial Network Connectivity Type:",
+        connectionInfo.type + ', effectiveType: ' + connectionInfo.effectiveType)
+      : toast.show('Initial Network Connectivity Type: ' // Android
+        + connectionInfo.type + ', effectiveType: ' + connectionInfo.effectiveType, toast.LONG)
+      });
+  };
+
+
+
+// NetInfo.addEventListener('connectionChange', this.handleConnectivityChange);
+//   }
+
+// componentWillUnmount() {
+//   NetInfo.removeEventListener('connectionChange', this.handleConnectivityChange);
+// }
+
+handleConnectivityChange = (connectionInfo) => {
+  switch (connectionInfo.type) {
+    case 'none':
+      (Platform.OS === 'ios') ? Alert.alert("Offline", "You are now offline!")
+        : toast.show('You are now offline!', toast.LONG);
+      break;
+    case 'wifi':
+      (Platform.OS === 'ios') ? Alert.alert("WiFi", "You are now connected to WiFi!")
+        : toast.show('You are now connected to WiFi!', toast.LONG);
+      break;
+    case 'cellular':
+      (Platform.OS === 'ios') ? Alert.alert("Cellular", "You are now connected to Cellular!")
+        : toast.show('You are now connected to Cellular!', toast.LONG);
+      break;
+    case 'unknown':
+      (Platform.OS === 'ios') ? Alert.alert("Unknown", "You now have unknown connection!")
+        : toast.show('You now have unknown connection!', toast.LONG);
+      break;
+    default:
+      break;
   }
+}
 
   render() {
     return (
@@ -315,7 +363,8 @@ class Main extends Component {
       </View>
     );
   }
-}
+};
+
 
 const styles = StyleSheet.create({
   container: {
